@@ -1,0 +1,465 @@
+<link rel="stylesheet" href="js/Leaflet/leaflet.css" />
+
+<style>
+    #map {
+        width: calc(100vw - 25px);
+        height: calc(100vh - 25px);
+        background: #fff !important;
+        border: 3px solid #DDD !important;
+        border-radius: 6px;
+        margin: 0;
+        cursor: default;
+    }
+
+    div.calloutBox {
+        border: 2px dotted rgba( 45,115,133, 0.25 );
+        background-color: rgba( 255, 255, 255, 0.75 );
+        width: fit-content !important;
+        height: fit-content !important;
+        white-space: nowrap;
+        display: flex;
+        flex-flow: row;
+        cursor: move;
+        /*resize: both;
+        overflow: auto;*/
+        /*position: relative;
+        top: 8px;*/
+    }
+    div.calloutBox:focus {
+        border: 3px dotted rgba( 45,115,133, 0.75 );
+    }
+
+    div.calloutBox > div {
+        cursor: text !important;
+        padding: 4px 6px;
+    }
+
+    div.calloutBox > div:focus {
+        outline: none !important;
+        border: 1px solid #719ECE;
+        box-shadow: 0 0 10px #719ECE;
+    }
+
+    .leaflet-interactive {
+        cursor: crosshair;
+    }
+    .leaflet-tile {
+        opacity: 0.25 !important;
+    }
+
+    @keyframes pulse-animation-high {
+    0% {
+        box-shadow: 0 0 0 0px rgba(0, 108, 138, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 0 8px rgba(255, 0, 0, 0);
+    }
+    }
+    @keyframes fade { 
+        from { opacity: 0.25; } 
+    }
+
+.leaflet-control-zoom {
+    display: none !important;
+}
+
+.leaflet-control-attribution {
+    display: none !important;
+}
+</style>
+
+<script type="text/javascript" src="js/Leaflet/leaflet.js"></script>
+<script type="text/javascript" src="js/jquery-3.5.1.min.js"></script>
+
+<div id="map"></div>
+
+<script language="javascript">
+
+    var rep_conf = {
+
+    "gis": {
+      "shapeLayer": "geojson/new.geojson",
+      "specialShapeLayers": [
+        {
+          "id": "fWsivdP3oUR",
+          "name": "Cape Verde",
+          "type": "Polygon",
+          "coordinates": [ [ 17.75, -26], [ 17.75, -22], [ 14.25, -22], [ 14.25, -26] ],
+          "options": { "clickable": 0, "fill": "rgba(90,147,235,0.2)", "weight": "1", "color": "#5A93EB" }
+        },
+        {
+          "id": "LxHV8mNN8Us",
+          "name": "Sao Tome and Principe",
+          "type": "Polygon",
+          "coordinates": [ [ 2, 6], [ 2, 8], [ -0.5, 8], [ -0.5, 6] ],
+          "options": { "clickable": 0, "fill": "rgba(90,147,235,0.2)", "weight": "1", "color": "#5A93EB" }
+        },
+        {
+          "id": "EBC03fHyigU",
+          "name": "Comoros",
+          "type": "Polygon",
+          "coordinates": [ [ -10.6, 42.6], [ -10.6, 46], [ -13.5, 46], [ -13.5, 42.6] ],
+          "options": { "clickable": 0, "fill": "rgba(90,147,235,0.2)", "weight": "1", "color": "#5A93EB" }
+        },
+        {
+          "id": "DKbIkKfceco",
+          "name": "Seychelles",
+          "type": "Polygon",
+          "coordinates": [ [ -3, 52.25], [ -3, 56.75], [ -6.75, 56.75], [ -6.75, 52.25] ],
+          "options": { "clickable": 0, "fill": "rgba(90,147,235,0.2)", "weight": "1", "color": "#5A93EB" }
+        },
+        {
+          "id": "DWcPviDtN9q",
+          "name": "Mauritius",
+          "type": "Polygon",
+          "coordinates": [ [ -19.5, 54.8], [ -19.5, 58.2], [ -21.75, 58.2], [ -21.75, 54.8] ],
+          "options": { "clickable": false, "fill": "rgba(90,147,235,0.2)", "weight": "1", "color": "#5A93EB" }
+        }
+      ]
+    },
+   "map": {
+      "iconSize": [
+        120,
+        20
+      ],
+      "setView": [
+        1.23,
+        15.557
+      ],
+      "styleRules": [
+        {
+          "conditions": {
+            "Region_UID": "ynUPYzmA3Qx"
+          },
+          "name": "eastAfrica",
+          "style": {
+            "color": "#fff",
+            "fillColor": "#9F2241",
+            "fillOpacity": "0.15",
+            "weight": 1
+          }
+        },
+        {
+          "conditions": {
+            "Region_UID": "lgF9DzO6BCC"
+          },
+          "name": "centralAfrica",
+          "style": {
+            "color": "#fff",
+            "fillColor": "#348E41",
+            "fillOpacity": "0.15",
+            "weight": 1
+          }
+        },
+        {
+          "conditions": {
+            "Region_UID": "R4VqRZJaDVG"
+          },
+          "name": "northAfrica",
+          "style": {
+            "color": "#fff",
+            "fillColor": "#B4A269",
+            "fillOpacity": "0.15",
+            "weight": 1
+          }
+        },
+        {
+          "conditions": {
+            "Region_UID": "tM0n92xvtsx"
+          },
+          "name": "southAfrica",
+          "style": {
+            "color": "#fff",
+            "fillColor": "#D8D8D8",
+            "fillOpacity": "0.35",
+            "weight": 1
+          }
+        },
+        {
+          "conditions": {
+            "Region_UID": "UzFdKL1DrLa"
+          },
+          "name": "westAfrica",
+          "style": {
+            "color": "#fff",
+            "fillColor": "#4A4A4A",
+            "fillOpacity": "0.15",
+            "weight": 1
+          }
+        }
+      ],
+      "zoom": 4
+    }
+  };
+
+    var ouDefaultStyling = {
+        stroke: "#fff",
+        color: "#fff",
+        weight: 0.1,
+        opacity: 0.1,
+        fill: false,
+        fillOpacity: 0
+    };
+
+    addSpecialShapeLayers = function( shapes, map )
+    {
+        var retArray = [];
+
+        shapes.forEach( shp => {
+
+            if ( shp.type === 'Polygon' )
+            {
+                var latlngs = shp.coordinates;
+                var polygon = L.polygon( shp.coordinates, shp.options || {} ).addTo( map );
+
+                retArray.push( polygon );
+            }
+
+        })
+        
+        return retArray;
+    }
+
+    addCalloutBox_toMarkerWithLine = function( opts )
+    {
+        var parm = opts || {};
+
+
+    }
+
+    var map;
+    var ouOutline = rep_conf.gis.shapeLayer;
+    var mapLayerOUoutline, mouseMoveLatLng, markersFeatureGroup = [];
+    var lastObj = {};
+
+    getCalloutBox = function( opts )
+    {
+        var props = opts || { width: 120, height: 20, text: mouseMoveLatLng.toString() };
+        var ret = `<svg xmlns="http://www.w3.org/2000/svg" width="` + props.width + `" height="` + props.height + `"><rect width="` + props.width + `" height="` + props.height + `" fill="#fff" style="stroke-width:2;stroke:#AAA" /><text x="4" y="` + ( ( props.height / 2 ) + 5 ) + `" fill="#000">` + props.text + `</text></svg>`;
+        console.log( 'svg', ret );
+        return ret;
+    }
+
+    getMatchingMapFeature = function( type, hasClassValue, id )
+    {
+        var ret;
+        map.eachLayer( layer => { 
+
+            if ( type === 'Marker' && layer instanceof L.Marker ) 
+            {
+                if ( layer.options?.id === id ) 
+                {
+                    console.log( 'Marker', layer );
+                    ret = layer;
+                }
+            }
+
+            if ( type === 'Polygon' && layer instanceof L.Polygon )
+            {
+                if ( layer.options?.id === id ) 
+                {
+                    console.log( 'Polygon', layer );
+                    ret = layer;
+                }
+            }
+
+            if ( type === 'Polyline' && layer instanceof L.Polyline )
+            {
+                if ( layer.options?.id === id ) 
+                {
+                    console.log( 'Polyline', layer );
+                    ret = layer;
+                }
+            }
+
+            if ( type === 'Rectangle' && layer instanceof L.Rectangle )
+            {
+                if ( layer.options?.id === id ) 
+                {
+                    console.log( 'Rectangle', layer );
+                    ret = layer;
+                }
+            }
+
+        })
+
+        return ret;
+    }
+
+
+    jQuery( document ).ready(function () {
+
+        map = L.map( 'map', { zoomSnap: 0.25, zoom: rep_conf.map.zoom }).setView( rep_conf.map.setView );
+
+        map.on('move',function(e) {
+            console.log('map.getZoom', map.getZoom() );
+            console.log('map.getCenter', map.getCenter() );
+        });
+
+        map.on('mousemove', function(evt) {
+            mouseMoveLatLng = evt.latlng;
+        });
+
+        map.on('dblclick', function(e) {
+
+            var baseCoordinate = rep_conf.map.setView;
+            var finalCoordinate = [ mouseMoveLatLng.lat, mouseMoveLatLng.lng ];
+            var polyLineCoords = [ baseCoordinate, finalCoordinate ];
+            var rndID = new Date().getTime();
+
+            //console.log( 'rndID', rndID );
+
+            var myIcon = L.divIcon( { className: 'calloutBox calloutBox_' + rndID, html: '<div contenteditable="true">' + mouseMoveLatLng.toString() } );
+            var marker = L.marker( [ mouseMoveLatLng.lat, mouseMoveLatLng.lng ], { icon: myIcon, draggable: true, id: rndID });
+            var polyline = L.polyline( polyLineCoords, { className: 'calloutLine calloutLine_' + rndID, color: '#AAA', weight: 1, dashArray: 8, id: rndID, baseCoordinate: baseCoordinate } ).addTo( map );
+
+
+            marker.addTo( map )
+                .on( 'click', function(){
+
+                    //console.log( $( marker._icon ) );
+                    //console.log( 'marker', marker );
+                    //console.log( '$( marker._icon ).children()', $( marker._icon ).children() );
+
+                    $( marker._icon ).css( 'zIndex', 1 );
+                    $( marker._icon ).css( 'animation', 'pulse-animation-high 2s infinite' );
+
+                    setTimeout( function(){
+                        $( marker._icon ).css( 'animation', '' );
+                    }, 2000 );
+
+                    setTimeout( () => {
+                        $( marker._icon ).children()[ 0 ].focus();
+
+                    }, 100 );
+
+                })
+                .on( 'mousedown', function(e){
+                    lastObj[ 'callout' ] = e.target?.options?.id;
+                })
+                .on( 'dragstart', function(ev){
+                    var calloutPolyline = getMatchingMapFeature( 'Polyline', 'calloutLine', lastObj[ 'callout' ] );
+                    lastObj[ 'calloutPolyline' ] = calloutPolyline;
+                })
+                .on( 'drag', function(ev){
+
+                    var newPosition = marker.getLatLng();
+                    var baseCoordinate = rep_conf.map.setView;
+                    var calloutPolyline = lastObj[ 'calloutPolyline' ]; //getMatchingMapFeature( 'Polyline', 'calloutLine', lastObj[ 'callout' ] );
+
+                    var finalCoordinate = [ newPosition.lat, newPosition.lng ];
+                    var newPolyLineCoords = [ baseCoordinate, finalCoordinate ];
+
+                    console.log( 'newPosition', newPosition );
+                    console.log( 'calloutPolyline', calloutPolyline );
+
+                    marker.setLatLng( finalCoordinate, { draggable: 'true' } );
+
+                    calloutPolyline.setLatLngs( newPolyLineCoords );
+                    
+                });
+
+                $( marker._icon ).find( 'div' ).on( 'blur', function(a,b){
+                    //console.log( 'blur', $( this ).html(), $( this ).html().length );
+                    if ( $( this ).html().length === 0 )
+                    {
+                        var calloutPolyline = getMatchingMapFeature( 'Polyline', 'calloutLine', lastObj[ 'callout' ] );
+                        map.removeLayer( calloutPolyline );
+                        map.removeLayer( marker );
+                    }
+                } )
+
+            markersFeatureGroup.push( marker );
+
+        });
+
+        map.doubleClickZoom.disable(); 
+
+        $.getJSON( ouOutline, function( ouData ){
+
+            console.log( 'countryOutline', ouData );
+
+            if ( rep_conf.gis?.specialShapeLayers )
+            {
+                console.log( '~specialShapeLayers', rep_conf.gis.specialShapeLayers );
+                addSpecialShapeLayers( rep_conf.gis.specialShapeLayers, map );
+            }
+
+            mapLayerOUoutline = L.geoJson( ouData, {
+                clickable: false
+            }).addTo( map );
+
+            console.log( '( rep_conf.map.styleRules )', ( rep_conf.map.styleRules ) );
+            console.log( 'mapLayerOUoutline', mapLayerOUoutline );
+
+            //if ( rep_conf.map.styleRules )
+            {
+                mapLayerOUoutline.eachLayer(function ( layer ) {
+                    console.log( '~layer.feature.properties', layer.feature.properties );
+                    rep_conf.map.styleRules.forEach( rule => {
+
+                        if ( rule?.conditions )
+                        {
+                            var conds = Object.keys( rule?.conditions );
+                            var num = 0, den = 0;
+
+                            conds.forEach( cond => {
+                                num += layer.feature.properties[ cond ] === rule?.conditions[ cond ]  ? 1 : 0;
+                                den += 1;
+                            })
+
+                            // passed all checks (assume AND comparison)
+                            if ( num === den )
+                            {
+                                var styleKeys = Object.keys( rule?.style );
+                                var toSet = {};
+
+                                styleKeys.forEach( stKey => {
+
+                                    toSet[ stKey ] = rule?.style[ stKey ];
+
+                                })
+
+                                layer.setStyle( toSet );
+                            }
+
+                        }
+                        else if ( rule?.propertyName ) // old method (only 1 check catered for)
+                        {
+                            if ( layer.feature.properties[ rule?.propertyName ] === rule?.propertyValue )
+                            {
+                                var styleKeys = Object.keys( rule?.style );
+                                var toSet = {};
+
+                                styleKeys.forEach( stKey => {
+
+                                    toSet[ stKey ] = rule?.style[ stKey ];
+
+                                })
+
+                                layer.setStyle( toSet );
+                                if ( debug ) console.log( '~b.', rule, num, den, layer.feature.properties, toSet );   
+                            }
+                        }
+
+                    });
+
+                });
+
+            }
+
+        })
+
+
+        var OpenStreetMap_Mapnik = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            style: { 'opacity': 0.25 }
+        });
+
+        OpenStreetMap_Mapnik.addTo( map );
+
+    })
+
+
+</script>
